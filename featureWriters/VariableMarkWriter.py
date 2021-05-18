@@ -5,6 +5,12 @@ from fontTools.feaLib import ast
 from collections import OrderedDict, defaultdict
 
 
+def get_location(designspace, location):
+    axis_map = {axis.name: axis.tag for axis in designspace.axes}
+    axis_to_userspace = {axis.name: axis.map_backward for axis in designspace.axes}
+    return {axis_map[name]: axis_to_userspace[name](v) for name, v in location.items()}
+
+
 class VariableMarkWriter(MarkFeatureWriter):
     def setContext(self, *args, **kwargs):
         # Rename "font" to "designspace" to avoid confusion
@@ -36,8 +42,9 @@ class VariableMarkWriter(MarkFeatureWriter):
             glyph = source.font[glyphName]
             for anchor in glyph.anchors:
                 if anchor.name == anchorName:
-                    x_value.add_value(source.location, anchor.x)
-                    y_value.add_value(source.location, anchor.y)
+                    location = get_location(self.context.designspace, source.location)
+                    x_value.add_value(location, anchor.x)
+                    y_value.add_value(location, anchor.y)
         return self._maybeNonVariable(x_value), self._maybeNonVariable(y_value)
 
     def _getAnchorLists(self):

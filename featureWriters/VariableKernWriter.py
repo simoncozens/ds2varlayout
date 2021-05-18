@@ -1,8 +1,18 @@
 from ufo2ft.featureWriters import KernFeatureWriter
-from ufo2ft.featureWriters.kernFeatureWriter import SIDE1_PREFIX, SIDE2_PREFIX, KerningPair
+from ufo2ft.featureWriters.kernFeatureWriter import (
+    SIDE1_PREFIX,
+    SIDE2_PREFIX,
+    KerningPair,
+)
 from itertools import chain
 from fontTools.feaLib.variableScalar import VariableScalar
 from fontTools.feaLib import ast
+
+
+def get_location(designspace, location):
+    axis_map = {axis.name: axis.tag for axis in designspace.axes}
+    axis_to_userspace = {axis.name: axis.map_backward for axis in designspace.axes}
+    return {axis_map[name]: axis_to_userspace[name](v) for name, v in location.items()}
 
 
 class VariableKernWriter(KernFeatureWriter):
@@ -27,7 +37,10 @@ class VariableKernWriter(KernFeatureWriter):
                     if name in side1Groups and side1Groups[name] != members:
                         self.log.warning(
                             "incompatible left groups: %s was previously %s, %s tried to make it %s",
-                            name, side1Groups[name], font, members
+                            name,
+                            side1Groups[name],
+                            font,
+                            members,
                         )
                         continue
                     side1Groups[name] = members
@@ -35,12 +48,14 @@ class VariableKernWriter(KernFeatureWriter):
                     if name in side2Groups and side2Groups[name] != members:
                         self.log.warning(
                             "incompatible right groups: %s was previously %s, %s tried to make it %s",
-                            name, side2Groups[name], font, members
+                            name,
+                            side2Groups[name],
+                            font,
+                            members,
                         )
                         continue
                     side2Groups[name] = members
         return side1Groups, side2Groups
-
 
     @staticmethod
     def getKerningPairs(designspace, side1Classes, side2Classes, glyphSet=None):
@@ -67,7 +82,11 @@ class VariableKernWriter(KernFeatureWriter):
                 value = VariableScalar()
                 for source in designspace.sources:
                     if (side1, side2) in source.font.kerning:
-                        value.add_value(source.location, source.font.kerning[side1, side2])
+                        location = get_location(designspace, source.location)
+                        value.add_value(location, source.font.kerning[side1, side2])
+                    elif source.font == default_font:
+                        location = get_location(designspace, source.location)
+                        value.add_value(location, 0)
                 values = list(value.values.values())
                 if not any(v != values[0] for v in values[1:]):
                     value = list(value.values.values())[0]
