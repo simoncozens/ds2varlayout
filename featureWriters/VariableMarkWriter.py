@@ -5,12 +5,6 @@ from fontTools.feaLib import ast
 from collections import OrderedDict, defaultdict
 
 
-def get_location(designspace, location):
-    axis_map = {axis.name: axis.tag for axis in designspace.axes}
-    axis_to_userspace = {axis.name: axis.map_backward for axis in designspace.axes}
-    return {axis_map[name]: axis_to_userspace[name](v) for name, v in location.items()}
-
-
 class VariableMarkWriter(MarkFeatureWriter):
     def setContext(self, *args, **kwargs):
         # Rename "font" to "designspace" to avoid confusion
@@ -23,11 +17,23 @@ class VariableMarkWriter(MarkFeatureWriter):
             insertComments=self.context.insertComments,
         )
         self.context.font = self.context.designspace.findDefault().font
+        self.context.axis_map = {
+            axis.name: axis.tag for axis in self.context.designspace.axes
+        }
+        self.context.axis_to_userspace = {
+            axis.name: axis.map_backward for axis in self.context.designspace.axes
+        }
         self.context.gdefClasses = self.getGDEFGlyphClasses()
         self.context.anchorLists = self._getAnchorLists()
         self.context.anchorPairs = self._getAnchorPairs()
 
         return self.context
+
+    def get_location(self, location):
+        return {
+            self.context.axis_map[name]: self.context.axis_to_userspace[name](v)
+            for name, v in location.items()
+        }
 
     def _maybeNonVariable(self, varscalar):
         values = list(varscalar.values.values())
@@ -42,7 +48,7 @@ class VariableMarkWriter(MarkFeatureWriter):
             glyph = source.font[glyphName]
             for anchor in glyph.anchors:
                 if anchor.name == anchorName:
-                    location = get_location(self.context.designspace, source.location)
+                    location = self.get_location(source.location)
                     x_value.add_value(location, anchor.x)
                     y_value.add_value(location, anchor.y)
         return self._maybeNonVariable(x_value), self._maybeNonVariable(y_value)
@@ -192,8 +198,10 @@ class VariableMarkWriter(MarkFeatureWriter):
             result.append(MarkToLigaPos(glyphName, ligatureMarks))
         return result
 
+
 def otRound(foo):
     return foo
+
 
 class AbstractMarkPos:
     """Object containing all the mark attachments for glyph 'name'.
