@@ -45,7 +45,6 @@ for wdict in defaultufo.lib[FEATURE_WRITERS_KEY]:
     if not isinstance(options, dict):
         raise TypeError(type(options))
     module = importlib.import_module(moduleName)
-    print(module, className)
     klass = getattr(module, className)
     if not isValidFeatureWriter(klass):
         raise TypeError(klass)
