@@ -35,7 +35,7 @@ fakecompiler = SimpleNamespace(glyphSet=glyphSet, ttFont=ttFont, axes=ds.axes)
 
 writers = []
 
-for wdict in defaultufo.lib[FEATURE_WRITERS_KEY]:
+for wdict in defaultufo.lib.get(FEATURE_WRITERS_KEY,[]):
     moduleName = wdict.get("module", __name__)
     className = wdict["class"]
     if className == "KernFeatureWriter":
