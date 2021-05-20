@@ -18,8 +18,9 @@ from ufo2ft.constants import FEATURE_WRITERS_KEY
 
 from featureWriters.VariableKernWriter import VariableKernWriter
 from featureWriters.VariableMarkWriter import VariableMarkWriter
+from featureWriters.VariableRulesWriter import VariableRulesWriter
 
-defaultFeatureWriters = [VariableKernWriter, VariableMarkWriter]
+defaultFeatureWriters = [VariableRulesWriter, VariableKernWriter, VariableMarkWriter]
 
 ds = DesignSpaceDocument.fromfile(sys.argv[1])
 ds.loadSourceFonts(opener=ufoLib2.Font)
@@ -53,6 +54,9 @@ for wdict in defaultufo.lib[FEATURE_WRITERS_KEY]:
 
 if not writers:
     writers = [writer() for writer in defaultFeatureWriters]
+
+if ds.rules and not any(isinstance(writer, VariableRulesWriter) for writer in writers):
+    writers = [VariableRulesWriter()] + writers
 
 for writer in writers:
     writer.write(ds, featurefile, compiler=fakecompiler)
