@@ -102,7 +102,7 @@ class VariableKernWriter(KernFeatureWriter):
         return result
 
     @staticmethod
-    def _makePairPosRule(pair, rtl=False):
+    def _makePairPosRule(pair, rtl=False, quantization=1):
         enumerated = pair.firstIsClass ^ pair.secondIsClass
         value = pair.value
         if rtl and "L" in pair.bidiTypes:

@@ -23,7 +23,7 @@ from featureWriters.VariableRulesWriter import VariableRulesWriter
 defaultFeatureWriters = [VariableRulesWriter, VariableKernWriter, VariableMarkWriter]
 
 ds = DesignSpaceDocument.fromfile(sys.argv[1])
-ds.loadSourceFonts(opener=ufoLib2.Font)
+ds.loadSourceFonts(opener=ufoLib2.Font.open)
 defaultufo = ds.findDefault().font
 featurefile = parseLayoutFeatures(defaultufo)
 
