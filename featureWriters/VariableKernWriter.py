@@ -7,6 +7,9 @@ from ufo2ft.featureWriters.kernFeatureWriter import (
 from itertools import chain
 from fontTools.feaLib.variableScalar import VariableScalar
 from fontTools.feaLib import ast
+import logging
+
+log = logging.getLogger(__file__)
 
 
 def get_location(designspace, location):
@@ -35,7 +38,7 @@ class VariableKernWriter(KernFeatureWriter):
                 # skip groups without UFO3 public.kern{1,2} prefix
                 if name.startswith(SIDE1_PREFIX):
                     if name in side1Groups and side1Groups[name] != members:
-                        self.log.warning(
+                        log.warning(
                             "incompatible left groups: %s was previously %s, %s tried to make it %s",
                             name,
                             side1Groups[name],
@@ -46,7 +49,7 @@ class VariableKernWriter(KernFeatureWriter):
                     side1Groups[name] = members
                 elif name.startswith(SIDE2_PREFIX):
                     if name in side2Groups and side2Groups[name] != members:
-                        self.log.warning(
+                        log.warning(
                             "incompatible right groups: %s was previously %s, %s tried to make it %s",
                             name,
                             side2Groups[name],
