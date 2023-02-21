@@ -1,7 +1,6 @@
-from ufo2ft.featureWriters import MarkFeatureWriter, BaseFeatureWriter
+from ufo2ft.featureWriters import MarkFeatureWriter, BaseFeatureWriter, ast
 from types import SimpleNamespace
 from fontTools.feaLib.variableScalar import VariableScalar
-from fontTools.feaLib import ast
 from collections import OrderedDict, defaultdict
 
 
@@ -26,7 +25,7 @@ class VariableMarkWriter(MarkFeatureWriter):
         self.context.gdefClasses = self.getGDEFGlyphClasses()
         self.context.anchorLists = self._getAnchorLists()
         self.context.anchorPairs = self._getAnchorPairs()
-
+        self.context.feaScripts = set(ast.getScriptLanguageSystems(self.context.feaFile).keys())
         return self.context
 
     def get_location(self, location):
